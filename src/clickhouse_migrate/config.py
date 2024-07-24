@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 
 
 @dataclass
@@ -9,7 +10,7 @@ class ClickhouseClientSettings:
     user: str = field(default=os.getenv("DB_CLICKHOUSE_USER", "default"))
     password: str = field(default=os.getenv("DB_CLICKHOUSE_PASS", ""))
     database: str = field(default=os.getenv("DB_CLICKHOUSE_NAME", "dwh"))
-    migrations_home: str = field(default=os.getenv("DB_CLICKHOUSE_SQL_PATH", ""))
+    migrations_home: str = field(default=os.getenv("DB_CLICKHOUSE_SQL_PATH", Path("./sql/")))
     secure: bool = field(default=os.getenv("DB_CLICKHOUSE_SECURE", False))
     verify: bool = field(default=os.getenv("DB_CLICKHOUSE_VERIFY", False))
     ca_certs: str = field(default=os.getenv("DB_CLICKHOUSE_CA_CERTS", ""))

@@ -8,13 +8,15 @@ import time
 from clickhouse_driver import Client
 
 
-def execute_and_inflate(client, query):
+def execute_and_inflate(client: Client, query: str) -> pd.DataFrame:
     result = client.execute(query, with_column_types=True)
     column_names = [c[0] for c in result[len(result) - 1]]
     return pd.DataFrame([dict(zip(column_names, d)) for d in result[0]])
 
 
-def get_connection(db_name, db_host, db_user, db_password, secure: bool, verify: bool, ca_certs: str, db_port=None):
+def get_connection(
+    db_name: str, db_host: str, db_user: str, db_password: str, secure: bool, verify: bool, ca_certs: str, db_port=None
+):
     return Client(
         db_host,
         port=db_port,
@@ -27,13 +29,22 @@ def get_connection(db_name, db_host, db_user, db_password, secure: bool, verify:
     )
 
 
-def init_db(client, db_name):
+def init_db(client: Client) -> None:
     client.execute(
-        "CREATE TABLE IF NOT EXISTS schema_versions (version UInt32, md5 String, script String, created_at DateTime DEFAULT now()) ENGINE = MergeTree ORDER BY tuple(created_at)"
+        """
+            CREATE TABLE IF NOT EXISTS schema_versions
+                (
+                    version UInt32,
+                    md5 String, 
+                    script String, 
+                    created_at DateTime DEFAULT now()
+                ) 
+            ENGINE = MergeTree ORDER BY tuple(created_at)
+        """
     )
 
 
-def migrations_to_apply(client, incoming):
+def migrations_to_apply(client: Client, incoming: pd.DataFrame) -> pd.DataFrame:
     current_versions = execute_and_inflate(
         client, "SELECT version AS version, script AS c_script, md5 as c_md5 from schema_versions"
     )
@@ -41,7 +52,8 @@ def migrations_to_apply(client, incoming):
         return incoming
     if len(incoming) == 0 or len(incoming) < len(current_versions):
         raise AssertionError(
-            "Migrations have gone missing, your code base should not truncate migrations, use migrations to correct older migrations"
+            """Migrations have gone missing, your code base should not truncate migrations, 
+               use migrations to correct older migrations"""
         )
     current_versions = current_versions.astype({"version": "int32"})
     incoming = incoming.astype({"version": "int32"})
@@ -49,7 +61,8 @@ def migrations_to_apply(client, incoming):
     committed_and_absconded = execution_stat[execution_stat.c_md5.notnull() & execution_stat.md5.isnull()]
     if len(committed_and_absconded) > 0:
         raise AssertionError(
-            "Migrations have gone missing, your code base should not truncate migrations, use migrations to correct older migrations"
+            """Migrations have gone missing, your code base should not truncate migrations, 
+               use migrations to correct older migrations"""
         )
     terms_violated = execution_stat[
         execution_stat.c_md5.notnull() & execution_stat.md5.notnull() & ~(execution_stat.md5 == execution_stat.c_md5)
@@ -59,7 +72,7 @@ def migrations_to_apply(client, incoming):
     return execution_stat[execution_stat.c_md5.isnull()][["version", "script", "md5"]]
 
 
-def apply_migration(client, migrations, db_name, queue_exec=True):
+def apply_migration(client: Client, migrations: pd.DataFrame, db_name: str, queue_exec: bool = True) -> None:
     if migrations.empty:
         return
     migrations = migrations.sort_values("version")
@@ -77,7 +90,7 @@ def apply_migration(client, migrations, db_name, queue_exec=True):
             )
 
 
-def pipelined(client, migration_script, db_name, timeout=60 * 60):
+def pipelined(client: Client, migration_script, db_name: str, timeout: int = 60 * 60) -> None:
     ct = datetime.datetime.now()
     current_time = ct.strftime("%Y-%m-%d %H:%M:%S")
     client.execute(migration_script)
@@ -102,7 +115,16 @@ def pipelined(client, migration_script, db_name, timeout=60 * 60):
         time.sleep(5)
 
 
-def create_db(db_name, db_host, db_user, db_password, secure: bool, verify: bool, ca_certs: str, db_port=None):
+def create_db(
+    db_name: str,
+    db_host: str,
+    db_user: str,
+    db_password: str,
+    secure: bool,
+    verify: bool,
+    ca_certs: str,
+    db_port: int = None,
+) -> None:
     client = Client(
         db_host, port=db_port, user=db_user, password=db_password, secure=secure, verify=verify, ca_certs=ca_certs
     )
@@ -122,7 +144,7 @@ def migrate(
     db_port: int = None,
     create_db_if_no_exists: bool = True,
     queue_exec: bool = True,
-):
+) -> None:
     if create_db_if_no_exists:
         create_db(
             db_name, db_host, db_user, db_password, db_port=db_port, secure=secure, verify=verify, ca_certs=ca_certs
@@ -130,7 +152,7 @@ def migrate(
     client = get_connection(
         db_name, db_host, db_user, db_password, db_port=db_port, secure=secure, verify=verify, ca_certs=ca_certs
     )
-    init_db(client, db_name)
+    init_db(client)
     migrations = [
         {
             "version": int(f.name.split("_")[0].replace("V", "")),
