@@ -82,7 +82,8 @@ def apply_migration(client: Client, migrations: pd.DataFrame, db_name: str, queu
             for migration_script in migration_scripts:
                 pipelined(client, migration_script, db_name) if queue_exec else client.execute(migration_script)
             print(
-                f"INSERT INTO schema_versions(version, script, md5) VALUES({row['version']}, '{row['script']}', '{row['md5']}')"
+                f"""INSERT INTO schema_versions(version, script, md5) 
+                    VALUES({row['version']}, '{row['script']}', '{row['md5']}')"""
             )
             client.execute(
                 "INSERT INTO schema_versions(version, script, md5) VALUES",
@@ -102,7 +103,15 @@ def pipelined(client: Client, migration_script, db_name: str, timeout: int = 60 
             )
         mutations_to_inspect = execute_and_inflate(
             client,
-            f"SELECT database, table, mutation_id, lower(command) as command FROM system.mutations WHERE database='{db_name}' and create_time >= '{current_time}' and is_done=0",
+            f"""
+                    SELECT 
+                        database, 
+                        table, 
+                        mutation_id, 
+                        lower(command) as command 
+                    FROM system.mutations 
+                    WHERE database='{db_name}' 
+                    and create_time >= '{current_time}' and is_done=0""",
         )
         if mutations_to_inspect.empty:
             break
