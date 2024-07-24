@@ -5,13 +5,13 @@ line-length = 120
 lint.select = ["ALL"]
 lint.ignore = ["D1", "D203", "D213", "FA102", "ANN101"]
 cache-dir = "/tmp/ruff-cache"
-src = ["clickhouse-migrator/clickhouse_migrate"]
+src = ["src/clickhouse_migrate"]
 
 [tool.ruff.lint.isort]
 section-order = ["third-party", "first-party", "local-folder"]
 no-lines-before = ["third-party"]
 
-[tool.ruff.lint.extend-per-file-ignores]k
+[tool.ruff.lint.extend-per-file-ignores]
 "tests/*.py" = ["ANN401", "S101", "S311"]
 
 [tool.mypy]

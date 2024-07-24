@@ -35,7 +35,7 @@ migrate(db_name, migrations_home, db_host, db_user, db_password, create_db_if_no
 
 ```python
 # > v1.0.4
-from clickhouse_migrate.migrate import migrate
+from src.clickhouse_migrate import migrate
 
 migrate(db_name, migrations_home, db_host, db_user, db_password, create_db_if_no_exists)
 ```
