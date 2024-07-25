@@ -14,19 +14,8 @@ def execute_and_inflate(client: Client, query: str) -> pd.DataFrame:
     return pd.DataFrame([dict(zip(column_names, d)) for d in result[0]])
 
 
-def get_connection(
-    db_name: str, db_host: str, db_user: str, db_password: str, secure: bool, verify: bool, ca_certs: str, db_port=None
-) -> Client:
-    return Client(
-        db_host,
-        port=db_port,
-        user=db_user,
-        password=db_password,
-        database=db_name,
-        secure=secure,
-        verify=verify,
-        ca_certs=ca_certs,
-    )
+def get_connection(db_name: str, db_host: str, db_user: str, db_password: str, db_port=None, **kwargs) -> Client:
+    return Client(db_host, port=db_port, user=db_user, password=db_password, database=db_name, **kwargs)
 
 
 def init_db(client: Client) -> None:
@@ -129,14 +118,10 @@ def create_db(
     db_host: str,
     db_user: str,
     db_password: str,
-    secure: bool,
-    verify: bool,
-    ca_certs: str,
     db_port: int = None,
+    **kwargs: dict,
 ) -> None:
-    client = Client(
-        db_host, port=db_port, user=db_user, password=db_password, secure=secure, verify=verify, ca_certs=ca_certs
-    )
+    client = Client(db_host, port=db_port, user=db_user, password=db_password, **kwargs)
     client.execute(f"CREATE DATABASE IF NOT EXISTS {db_name}")
     client.disconnect()
 
@@ -147,20 +132,14 @@ def migrate(
     db_host: str,
     db_user: str,
     db_password: str,
-    secure: bool,
-    verify: bool,
-    ca_certs: str,
     db_port: int = None,
     create_db_if_no_exists: bool = True,
     queue_exec: bool = True,
+    **kwargs: dict,  # Additional parameters for the connection
 ) -> None:
     if create_db_if_no_exists:
-        create_db(
-            db_name, db_host, db_user, db_password, db_port=db_port, secure=secure, verify=verify, ca_certs=ca_certs
-        )
-    client = get_connection(
-        db_name, db_host, db_user, db_password, db_port=db_port, secure=secure, verify=verify, ca_certs=ca_certs
-    )
+        create_db(db_name, db_host, db_user, db_password, db_port=db_port, **kwargs)
+    client = get_connection(db_name, db_host, db_user, db_password, db_port=db_port, **kwargs)
     init_db(client)
     migrations = [
         {
