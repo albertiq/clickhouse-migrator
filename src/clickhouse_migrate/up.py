@@ -5,15 +5,17 @@ if __name__ == "__main__":
     while True:
         try:
             migrate(
-                cfg.database,
-                cfg.migrations_home,
-                cfg.host,
-                cfg.user,
-                cfg.password,
-                cfg.port,
-                cfg.secure,
-                cfg.verify,
-                cfg.ca_certs,
+                db_name=cfg.database,
+                migrations_home=cfg.migrations_home,
+                db_host=cfg.host,
+                db_user=cfg.user,
+                db_password=cfg.password,
+                db_port=cfg.port,
+                secure=cfg.secure,
+                verify=cfg.verify,
+                ca_certs=cfg.ca_certs,
             )
         except Exception as e:
             print(f"Error during migration: {str(e)}")
+        finally:
+            break
