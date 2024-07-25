@@ -16,7 +16,7 @@ def execute_and_inflate(client: Client, query: str) -> pd.DataFrame:
 
 def get_connection(
     db_name: str, db_host: str, db_user: str, db_password: str, secure: bool, verify: bool, ca_certs: str, db_port=None
-):
+) -> Client:
     return Client(
         db_host,
         port=db_port,
