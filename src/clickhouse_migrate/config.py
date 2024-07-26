@@ -15,6 +15,8 @@ class ClickhouseClientSettings:
     secure: Optional[bool] = field(default=os.getenv("DB_CLICKHOUSE_SECURE"))
     verify: Optional[bool] = field(default=os.getenv("DB_CLICKHOUSE_VERIFY"))
     ca_certs: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_CA_CERTS"))
+    certfile: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_CERT_FILE"))
+    keyfile: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_KEY_FILE"))
 
 
 clickhouse_client_config = ClickhouseClientSettings()
