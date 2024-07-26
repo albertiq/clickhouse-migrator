@@ -15,7 +15,7 @@ if __name__ == "__main__":
                 verify=cfg.verify,
                 ca_certs=cfg.ca_certs,
             )
+            break
         except Exception as e:
             print(f"Error during migration: {str(e)}")
-        finally:
-            break
+            continue
