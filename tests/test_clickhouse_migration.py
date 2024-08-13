@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import pytest
-from src.clickhouse_migrate import execute_and_inflate, get_connection, init_db, migrate, migrations_to_apply
+from src.clickhouse_migrate.migrate import execute_and_inflate, get_connection, init_db, migrate, migrations_to_apply
 
 
 @pytest.fixture
