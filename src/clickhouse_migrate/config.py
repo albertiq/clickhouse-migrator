@@ -14,9 +14,9 @@ class ClickhouseClientSettings:
     migrations_home: str = field(default=os.getenv("DB_CLICKHOUSE_SQL_PATH", Path("./sql/")))
     secure: Optional[bool] = field(default=os.getenv("DB_CLICKHOUSE_SECURE"))
     verify: Optional[bool] = field(default=os.getenv("DB_CLICKHOUSE_VERIFY"))
-    ca_certs: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_CA_CERTS"))
-    certfile: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_CERT_FILE"))
-    keyfile: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_KEY_FILE"))
+    ca_certs: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_CA_CERTS", Path("./certs/clickhouse-ca.crt")))
+    certfile: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_CERT_FILE", Path("./certs/clickhouse.crt")))
+    keyfile: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_KEY_FILE", Path("./certs/clickhouse.key")))
 
 
 clickhouse_client_config = ClickhouseClientSettings()
