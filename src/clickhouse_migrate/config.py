@@ -15,7 +15,7 @@ class ClickhouseClientSettings:
     migrations_home: str = field(default=os.getenv("DB_CLICKHOUSE_SQL_PATH", Path("./sql/")))
     secure: Optional[bool] = field(init=False)
     verify: Optional[bool] = field(init=False)
-    ca_certs: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_CA_CERTS_PATH"))
+    ca_certs: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_CA_CERT_FILE_PATH"))
     certfile: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_CERT_FILE_PATH"))
     keyfile: Optional[str] = field(default=os.getenv("DB_CLICKHOUSE_KEY_FILE_PATH"))
     is_secure: Optional[bool] = field(init=False)
