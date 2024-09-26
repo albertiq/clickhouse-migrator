@@ -67,7 +67,11 @@ def apply_migration(client: Client, migrations: pd.DataFrame, db_name: str, queu
     migrations = migrations.sort_values("version")
     for _, row in migrations.iterrows():
         with open(row["script"]) as f:
-            migration_scripts = json.load(f) if row["script"].endswith(".json") else [f.read()]
+            migration_scripts = (
+                json.load(f)
+                if row["script"].endswith(".json")
+                else [query.strip() for query in f.read().split(";") if query.strip()]
+            )
             for migration_script in migration_scripts:
                 pipelined(client, migration_script, db_name) if queue_exec else client.execute(migration_script)
             print(
